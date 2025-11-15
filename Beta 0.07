@@ -1,0 +1,345 @@
+-- Arceus X Teleport GUI
+
+local Players = game:GetService("Players")
+
+local TweenService = game:GetService("TweenService")
+
+local UserInputService = game:GetService("UserInputService")
+
+
+
+local player = Players.LocalPlayer
+
+local playerGui = player:WaitForChild("PlayerGui")
+
+
+
+-- GUI Oluşturma
+
+local screenGui = Instance.new("ScreenGui")
+
+screenGui.Name = "TeleportGUI"
+
+screenGui.Parent = playerGui
+
+screenGui.ResetOnSpawn = false
+
+
+
+-- Ana Frame
+
+local mainFrame = Instance.new("Frame")
+
+mainFrame.Size = UDim2.new(0, 350, 0, 400)
+
+mainFrame.Position = UDim2.new(0.5, -175, 0.5, -200)
+
+mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+
+mainFrame.BorderSizePixel = 0
+
+mainFrame.Parent = screenGui
+
+
+
+-- Frame Köşe Yuvarlatma
+
+local corner = Instance.new("UICorner")
+
+corner.CornerRadius = UDim.new(0, 10)
+
+corner.Parent = mainFrame
+
+
+
+-- Başlık
+
+local title = Instance.new("TextLabel")
+
+title.Size = UDim2.new(1, 0, 0, 50)
+
+title.Position = UDim2.new(0, 0, 0, 0)
+
+title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+
+title.BorderSizePixel = 0
+
+title.Text = "🗺️ TELEPORT GUI"
+
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+title.TextScaled = true
+
+title.Font = Enum.Font.GothamBold
+
+title.Parent = mainFrame
+
+
+
+-- Başlık Köşe Yuvarlatma
+
+local titleCorner = Instance.new("UICorner")
+
+titleCorner.CornerRadius = UDim.new(0, 10)
+
+titleCorner.Parent = title
+
+
+
+-- Teleport Fonksiyonu
+
+local function teleportTo(x, y, z, mapName)
+
+    local character = player.Character
+
+    if character and character:FindFirstChild("HumanoidRootPart") then
+
+        local humanoidRootPart = character.HumanoidRootPart
+
+        
+
+        -- Smooth teleport with tween
+
+        local targetPosition = Vector3.new(x, y, z)
+
+        local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
+        local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
+
+        
+
+        tween:Play()
+
+        
+
+        -- Bildirim
+
+        game.StarterGui:SetCore("SendNotification", {
+
+            Title = "Teleport Başarılı!";
+
+            Text = mapName .. " haritasına ışınlandınız!";
+
+            Duration = 3;
+
+        })
+
+    end
+
+end
+
+
+
+-- Teleport Butonları
+
+local teleportLocations = {
+
+    {name = "🏕️ KAMP HARİTASI", x = -2564.00, y = 38.33, z = 437.39},
+
+    {name = "🚢 GEMİ HARİTASI", x = -2139.83, y = 25.83, z = 2597.87},
+
+    {name = "🏜️ ÇÖL HARİTASI", x = -58.55, y = 88.36, z = 2631.81},
+
+    {name = "🏙️ ŞEHİR HARİTASI", x = -535.62, y = 91.44, z = 358.40},
+
+    {name = "❄️ KIŞ HARİTASI", x = -2125.76, y = 160.60, z = -2071.29}
+
+}
+
+
+
+for i, location in ipairs(teleportLocations) do
+
+    local button = Instance.new("TextButton")
+
+    button.Size = UDim2.new(0.9, 0, 0, 50)
+
+    button.Position = UDim2.new(0.05, 0, 0, 70 + (i-1) * 60)
+
+    button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+
+    button.BorderSizePixel = 0
+
+    button.Text = location.name
+
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+    button.TextScaled = true
+
+    button.Font = Enum.Font.Gotham
+
+    button.Parent = mainFrame
+
+    
+
+    -- Buton Köşe Yuvarlatma
+
+    local buttonCorner = Instance.new("UICorner")
+
+    buttonCorner.CornerRadius = UDim.new(0, 8)
+
+    buttonCorner.Parent = button
+
+    
+
+    -- Hover Efekti
+
+    button.MouseEnter:Connect(function()
+
+        local hoverTween = TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)})
+
+        hoverTween:Play()
+
+    end)
+
+    
+
+    button.MouseLeave:Connect(function()
+
+        local leaveTween = TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 45, 45)})
+
+        leaveTween:Play()
+
+    end)
+
+    
+
+    -- Teleport Fonksiyonu
+
+    button.MouseButton1Click:Connect(function()
+
+        teleportTo(location.x, location.y, location.z, location.name)
+
+        
+
+        -- Buton animasyonu
+
+        local clickTween = TweenService:Create(button, TweenInfo.new(0.1), {Size = UDim2.new(0.85, 0, 0, 45)})
+
+        clickTween:Play()
+
+        clickTween.Completed:Connect(function()
+
+            local returnTween = TweenService:Create(button, TweenInfo.new(0.1), {Size = UDim2.new(0.9, 0, 0, 50)})
+
+            returnTween:Play()
+
+        end)
+
+    end)
+
+end
+
+
+
+-- Kapatma Butonu
+
+local closeButton = Instance.new("TextButton")
+
+closeButton.Size = UDim2.new(0, 30, 0, 30)
+
+closeButton.Position = UDim2.new(1, -35, 0, 5)
+
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+
+closeButton.BorderSizePixel = 0
+
+closeButton.Text = "❌"
+
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+closeButton.TextScaled = true
+
+closeButton.Font = Enum.Font.Gotham
+
+closeButton.Parent = mainFrame
+
+
+
+local closeCorner = Instance.new("UICorner")
+
+closeCorner.CornerRadius = UDim.new(0, 15)
+
+closeCorner.Parent = closeButton
+
+
+
+closeButton.MouseButton1Click:Connect(function()
+
+    screenGui:Destroy()
+
+end)
+
+
+
+-- Sürükleme Sistemi
+
+local dragging = false
+
+local dragStart = nil
+
+local startPos = nil
+
+
+
+title.InputBegan:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+
+        dragging = true
+
+        dragStart = input.Position
+
+        startPos = mainFrame.Position
+
+    end
+
+end)
+
+
+
+title.InputChanged:Connect(function(input)
+
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+
+        local delta = input.Position - dragStart
+
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+
+    end
+
+end)
+
+
+
+UserInputService.InputEnded:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+
+        dragging = false
+
+    end
+
+end)
+
+
+
+-- Açılış Animasyonu
+
+mainFrame.Size = UDim2.new(0, 0, 0, 0)
+
+local openTween = TweenService:Create(mainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Size = UDim2.new(0, 350, 0, 400)})
+
+openTween:Play()
+
+
+
+print("🗺️ Teleport GUI başarıyla yüklendi!")
+
+print("📍 Kullanılabilir haritalar:")
+
+for _, location in ipairs(teleportLocations) do
+
+    print("   • " .. location.name)
+
+end
